@@ -27,9 +27,9 @@ type BroadcastPayload struct {
 	Message        []byte
 	ConversationID string
 	SenderID       string
-	RecipientID    string // For targeted messages like game invites, friend requests
+	RecipientID    string           // For targeted messages like game invites, friend requests
 	EventType      domain.EventType // What type of event this is (e.g., "new_message", "game_invite", "game_update")
-	EventPayload   interface{} // The raw payload for the event service
+	EventPayload   interface{}      // The raw payload for the event service
 }
 
 func NewHub(messageService usecase.MessageUseCase, convoService usecase.ConversationUseCase, gameService usecase.GameUseCase, eventService usecase.EventUseCase) *Hub {

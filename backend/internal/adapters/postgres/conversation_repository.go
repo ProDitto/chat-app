@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -37,6 +38,18 @@ func (r *PostgresConversationRepository) RemoveParticipant(ctx context.Context, 
 	return err
 }
 
+func (r *PostgresConversationRepository) IsUserInConversation(ctx context.Context, conversationID, userID string) (bool, error) {
+	participants, err := r.GetParticipantIDs(ctx, conversationID)
+	if err != nil {
+		return false, err
+	}
+	for _, pid := range participants {
+		if pid == userID {
+			return true, nil
+		}
+	}
+	return false, nil
+}
 
 func (r *PostgresConversationRepository) GetParticipantIDs(ctx context.Context, conversationID string) ([]string, error) {
 	query := `SELECT user_id FROM conversation_participants WHERE conversation_id = $1`
@@ -100,12 +113,11 @@ func (r *PostgresConversationRepository) FindForUser(ctx context.Context, userID
 		var group domain.Group
 		var lastReadTimestamp time.Time
 
-		var lastMessageID, lastMessageSenderID, lastMessageContent, senderUsername, senderProfilePictureURL pgx.NullString
-		var lastMessageTimestamp pgx.NullTime
-		var unreadCount pgx.NullInt32
-		var groupName, groupSlug, groupOwnerID pgx.NullString
-		var groupCreatedAt pgx.NullTime
-
+		var lastMessageID, lastMessageSenderID, lastMessageContent, senderUsername, senderProfilePictureURL pgtype.Text
+		var lastMessageTimestamp pgtype.Timestamp
+		var unreadCount pgtype.Int4
+		var groupName, groupSlug, groupOwnerID pgtype.Text
+		var groupCreatedAt pgtype.Timestamp
 
 		err := rows.Scan(
 			&convo.ID, &convo.Type, &convo.CreatedAt,

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"real-time-chat/internal/config"
 	"real-time-chat/internal/domain"
 	"real-time-chat/internal/usecase"
 	"real-time-chat/internal/utils"
@@ -28,16 +29,20 @@ var (
 	ErrProfilePictureInvalid = errors.New("invalid profile picture URL")
 )
 
+type UserService struct {
+	userService
+}
+
 type userService struct {
 	userRepo     domain.UserRepository
-	tokenService usecase.TokenUseCase
+	TokenService usecase.TokenUseCase
 	emailSender  utils.EmailSender
 }
 
 func NewUserService(userRepo domain.UserRepository, tokenService usecase.TokenUseCase, emailSender utils.EmailSender) usecase.UserUseCase {
 	return &userService{
 		userRepo:     userRepo,
-		tokenService: tokenService,
+		TokenService: tokenService,
 		emailSender:  emailSender,
 	}
 }
@@ -72,7 +77,7 @@ func (s *userService) Register(ctx context.Context, email, username, password st
 	}
 
 	// Send email verification
-	verificationToken, err := s.tokenService.GenerateEmailVerificationToken(user.ID, user.Email)
+	verificationToken, err := s.TokenService.GenerateEmailVerificationToken(user.ID, user.Email)
 	if err != nil {
 		log.Printf("Failed to generate email verification token for %s: %v", user.Email, err)
 		// Don't fail registration, but log the error. User can request new verification later.
@@ -92,7 +97,7 @@ func (s *userService) GetUserByID(ctx context.Context, userID string) (*domain.U
 }
 
 func (s *userService) VerifyEmail(ctx context.Context, token string) error {
-	claims, err := utils.ValidateEmailVerificationToken(token, s.tokenService.(*tokenService).jwtSecret) // Use specific validation and secret
+	claims, err := utils.ValidateEmailVerificationToken(token, s.TokenService.(*tokenService).jwtSecret) // Use specific validation and secret
 	if err != nil {
 		return ErrTokenInvalid
 	}
@@ -109,14 +114,14 @@ func (s *userService) VerifyEmail(ctx context.Context, token string) error {
 }
 
 func (s *userService) RequestPasswordReset(ctx context.Context, email string) error {
-	user, err := s.userRepo.FindByEmail(ctx, email)
+	_, err := s.userRepo.FindByEmail(ctx, email)
 	if err != nil {
 		return ErrUserNotFound
 	}
 
 	// Generate and store OTP
 	otp := utils.GenerateOTP(6) // 6-digit OTP
-	err = s.tokenService.StoreOTP(ctx, email, otp)
+	err = s.TokenService.StoreOTP(ctx, email, otp)
 	if err != nil {
 		return fmt.Errorf("failed to store OTP: %w", err)
 	}
@@ -134,7 +139,7 @@ func (s *userService) ResetPassword(ctx context.Context, email, otp, newPassword
 		return ErrPasswordTooShort
 	}
 
-	storedOTP, err := s.tokenService.GetOTP(ctx, email)
+	storedOTP, err := s.TokenService.GetOTP(ctx, email)
 	if err != nil {
 		return ErrOTPInvalidOrExpired
 	}
@@ -157,7 +162,7 @@ func (s *userService) ResetPassword(ctx context.Context, email, otp, newPassword
 	}
 
 	// Delete OTP after successful reset
-	s.tokenService.DeleteOTP(ctx, email)
+	s.TokenService.DeleteOTP(ctx, email)
 	return nil
 }
 
@@ -166,7 +171,7 @@ func (s *userService) UploadProfilePicture(ctx context.Context, userID, filename
 	if err != nil {
 		return "", ErrUserNotFound
 	}
-	
+
 	// Construct public URL
 	publicURL := "/uploads/" + filename // This assumes /uploads is served statically
 
@@ -175,7 +180,6 @@ func (s *userService) UploadProfilePicture(ctx context.Context, userID, filename
 	}
 	return publicURL, nil
 }
-
 
 // tokenService implements TokenUseCase for JWT and OTP management
 type tokenService struct {
@@ -189,12 +193,12 @@ type tokenService struct {
 
 func NewTokenService(userRepo domain.UserRepository, tokenRepo domain.TokenRepository, jwtSecret string, accessDuration, refreshDuration, otpExpiry time.Duration) usecase.TokenUseCase {
 	return &tokenService{
-		userRepo:       userRepo,
-		tokenRepo:      tokenRepo,
-		jwtSecret:      jwtSecret,
+		userRepo:        userRepo,
+		tokenRepo:       tokenRepo,
+		jwtSecret:       jwtSecret,
 		accessDuration:  accessDuration,
 		refreshDuration: refreshDuration,
-		otpExpiry:      otpExpiry,
+		otpExpiry:       otpExpiry,
 	}
 }
 

@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"errors"
+	"fmt"
 	"real-time-chat/internal/domain"
 	"real-time-chat/internal/services" // For custom error types
 

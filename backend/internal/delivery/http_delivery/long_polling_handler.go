@@ -1,11 +1,12 @@
 package http_delivery
 
 import (
-	"encoding/json"
+	"context"
 	"net/http"
-	"real-time-chat/internal/domain"
+	"real-time-chat/internal/services"
 	"real-time-chat/internal/usecase"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -32,10 +33,10 @@ func (h *LongPollingHandler) HandleLongPolling(w http.ResponseWriter, r *http.Re
 		return
 	}
 	accessToken := tokenParts[1]
-	
+
 	// Temporarily create a dummy token service or pass it in.
 	// For simplicity, let's use a simplified validation that's good enough for this context.
-	claims, err := usecase.TokenUseCase.ValidateToken(h.userService.(*services.userService).tokenService, accessToken) // Access tokenService via userService
+	claims, err := usecase.TokenUseCase.ValidateToken(h.userService.(*services.UserService).TokenService, accessToken) // Access tokenService via userService
 	if err != nil {
 		ErrorResponse(w, http.StatusUnauthorized, "Invalid token")
 		return

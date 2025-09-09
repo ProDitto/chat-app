@@ -2,6 +2,7 @@ package http_delivery
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"real-time-chat/internal/domain"
 	"real-time-chat/internal/usecase"

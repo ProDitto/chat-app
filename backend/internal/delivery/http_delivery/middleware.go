@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"real-time-chat/internal/domain"
+	"real-time-chat/internal/services"
 	"real-time-chat/internal/usecase"
 	"strings"
 )
@@ -32,7 +32,7 @@ func AuthMiddleware(jwtSecret string, userService usecase.UserUseCase) func(http
 			// A real app should use a dedicated token service here,
 			// but for now, we access it via the userService's internal tokenService dependency.
 			// This is a slight architectural compromise for simplicity given the tool's constraints.
-			claims, err := userService.(*services.userService).tokenService.ValidateToken(accessToken)
+			claims, err := userService.(*services.UserService).TokenService.ValidateToken(accessToken)
 			if err != nil {
 				ErrorResponse(w, http.StatusUnauthorized, "Invalid token")
 				return

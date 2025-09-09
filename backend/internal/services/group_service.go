@@ -15,16 +15,16 @@ import (
 )
 
 var (
-	ErrGroupNotFound        = errors.New("group not found")
-	ErrGroupSlugExists      = errors.New("group slug already exists")
-	ErrGroupNameTooLong     = errors.New("group name must be at most 20 characters")
-	ErrGroupSlugTooLong     = errors.New("group slug must be at most 20 characters")
-	ErrInvalidGroupSlug     = errors.New("group slug can only contain lowercase alphabets, numbers, and underscore")
-	ErrNotGroupOwner        = errors.New("only group owner can perform this action")
-	ErrMemberNotFound       = errors.New("member not found in group")
-	ErrAlreadyMember        = errors.New("user is already a member of this group")
-	ErrCannotRemoveOwner    = errors.New("cannot remove group owner")
-	ErrMinGroupMembers      = errors.New("group must have at least one member")
+	ErrGroupNotFound     = errors.New("group not found")
+	ErrGroupSlugExists   = errors.New("group slug already exists")
+	ErrGroupNameTooLong  = errors.New("group name must be at most 20 characters")
+	ErrGroupSlugTooLong  = errors.New("group slug must be at most 20 characters")
+	ErrInvalidGroupSlug  = errors.New("group slug can only contain lowercase alphabets, numbers, and underscore")
+	ErrNotGroupOwner     = errors.New("only group owner can perform this action")
+	ErrMemberNotFound    = errors.New("member not found in group")
+	ErrAlreadyMember     = errors.New("user is already a member of this group")
+	ErrCannotRemoveOwner = errors.New("cannot remove group owner")
+	ErrMinGroupMembers   = errors.New("group must have at least one member")
 )
 
 var slugRegex = regexp.MustCompile("^[a-z0-9_]+$")
@@ -86,13 +86,12 @@ func (s *groupService) CreateGroup(ctx context.Context, ownerID, name, slug stri
 
 	// Create event for all members
 	eventPayload := map[string]interface{}{
-		"group": group,
+		"group":   group,
 		"members": allMembers, // Just IDs for payload
 	}
 	for _, memberID := range allMembers {
 		s.eventService.CreateEvent(ctx, memberID, domain.EventGroupCreated, eventPayload)
 	}
-
 
 	return group, nil
 }
@@ -114,7 +113,7 @@ func (s *groupService) JoinGroup(ctx context.Context, groupID, userID string) er
 	if err != nil {
 		return ErrGroupNotFound
 	}
-	
+
 	isMember, err := s.convoService.IsUserInConversation(ctx, groupID, userID)
 	if err != nil {
 		return err
@@ -164,7 +163,9 @@ func (s *groupService) LeaveGroup(ctx context.Context, groupID, userID string) e
 			log.Printf("Owner %s is also the oldest member in group %s. Need better owner transfer logic.", userID, groupID)
 			// For now, if oldest is owner, just assign to another arbitrary member (not robust)
 			members, err := s.groupRepo.GetMembers(ctx, groupID)
-			if err != nil { return err }
+			if err != nil {
+				return err
+			}
 			newOwnerFound := false
 			for _, m := range members {
 				if m.ID != userID {
@@ -191,7 +192,6 @@ func (s *groupService) LeaveGroup(ctx context.Context, groupID, userID string) e
 	// Create event for the user who left
 	groupJSON, _ := json.Marshal(group)
 	s.eventService.CreateEvent(ctx, userID, domain.EventGroupLeft, map[string]json.RawMessage{"group": groupJSON})
-
 
 	// Check if group should be deleted after member leaves
 	memberCount, err := s.groupRepo.CountMembers(ctx, groupID)
@@ -229,13 +229,13 @@ func (s *groupService) RemoveGroupMember(ctx context.Context, performingUserID, 
 	if err := s.convoService.RemoveParticipant(ctx, groupID, memberToRemoveID); err != nil {
 		return err
 	}
-	
+
 	// Create event for the removed member
-	removedUser, err := s.userRepo.FindByID(ctx, memberToRemoveID)
-	if err != nil { /* log error */ }
+	_, err = s.userRepo.FindByID(ctx, memberToRemoveID)
+	if err != nil { /* log error */
+	}
 	groupJSON, _ := json.Marshal(group)
 	s.eventService.CreateEvent(ctx, memberToRemoveID, domain.EventGroupLeft, map[string]json.RawMessage{"group": groupJSON, "reason": json.RawMessage(`"removed_by_owner"`)})
-
 
 	// Check if group should be deleted after member leaves
 	memberCount, err := s.groupRepo.CountMembers(ctx, groupID)

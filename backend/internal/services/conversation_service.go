@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"real-time-chat/internal/domain"
 	"real-time-chat/internal/usecase"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -29,7 +28,7 @@ func (s *conversationService) GetUserConversations(ctx context.Context, userID s
 
 	// Populate conversation names for one-on-one chats and group details
 	for _, convo := range convos {
-		if convo.Type == domain.OneToOne {
+		if convo.Type == domain.TypeOneToOne {
 			participantIDs, err := s.convoRepo.GetParticipantIDs(ctx, convo.ID)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get participants for convo %s: %w", convo.ID, err)
@@ -47,7 +46,7 @@ func (s *conversationService) GetUserConversations(ctx context.Context, userID s
 					break
 				}
 			}
-		} else if convo.Type == domain.Group {
+		} else if convo.Type == domain.TypeGroup {
 			group, err := s.groupRepo.FindByID(ctx, convo.ID) // Assuming groupID == conversationID for groups
 			if err != nil {
 				// Similar handling for missing group
@@ -58,6 +57,14 @@ func (s *conversationService) GetUserConversations(ctx context.Context, userID s
 		}
 	}
 	return convos, nil
+}
+
+func (s *conversationService) AddParticipant(ctx context.Context, conversationID, userID string) error {
+	return s.convoRepo.AddParticipant(ctx, conversationID, userID)
+}
+
+func (s *conversationService) RemoveParticipant(ctx context.Context, conversationID, userID string) error {
+	return s.convoRepo.RemoveParticipant(ctx, conversationID, userID)
 }
 
 func (s *conversationService) GetParticipantIDs(ctx context.Context, conversationID string) ([]string, error) {
@@ -79,7 +86,7 @@ func (s *conversationService) CreateOneToOneConversation(ctx context.Context, us
 
 	convo := &domain.Conversation{
 		ID:   uuid.NewString(),
-		Type: domain.OneToOne,
+		Type: domain.TypeOneToOne,
 	}
 	convoID, err := s.convoRepo.Create(ctx, convo)
 	if err != nil {
@@ -99,7 +106,7 @@ func (s *conversationService) DeleteOneToOneConversation(ctx context.Context, co
 	if err != nil {
 		return errors.New("conversation not found")
 	}
-	if convo.Type != domain.OneToOne {
+	if convo.Type != domain.TypeOneToOne {
 		return errors.New("only one-on-one conversations can be deleted this way")
 	}
 
@@ -133,22 +140,13 @@ func (s *conversationService) GetConversationByID(ctx context.Context, conversat
 }
 
 func (s *conversationService) IsUserInConversation(ctx context.Context, conversationID, userID string) (bool, error) {
-	participants, err := s.convoRepo.GetParticipantIDs(ctx, conversationID)
-	if err != nil {
-		return false, err
-	}
-	for _, pid := range participants {
-		if pid == userID {
-			return true, nil
-		}
-	}
-	return false, nil
+	return s.convoRepo.IsUserInConversation(ctx, conversationID, userID)
 }
 
 func (s *conversationService) CreateGroupConversation(ctx context.Context, groupID string, participantIDs []string) error {
 	convo := &domain.Conversation{
 		ID:   groupID, // Group ID is also the Conversation ID
-		Type: domain.Group,
+		Type: domain.TypeGroup,
 	}
 	_, err := s.convoRepo.Create(ctx, convo)
 	if err != nil {

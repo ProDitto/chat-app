@@ -40,6 +40,8 @@ type MessageUseCase interface {
 }
 
 type ConversationUseCase interface {
+	AddParticipant(ctx context.Context, groupID, userID string) error
+	RemoveParticipant(ctx context.Context, groupID, userID string) error
 	GetUserConversations(ctx context.Context, userID string) ([]*domain.Conversation, error)
 	GetParticipantIDs(ctx context.Context, conversationID string) ([]string, error)
 	MarkConversationAsRead(ctx context.Context, conversationID, userID string) error

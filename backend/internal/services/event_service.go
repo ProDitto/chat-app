@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"real-time-chat/internal/domain"
 	"real-time-chat/internal/usecase"
@@ -40,22 +39,22 @@ func (s *eventService) CreateEvent(ctx context.Context, userID string, eventType
 
 func (s *eventService) GetEventsForUser(ctx context.Context, userID string, sinceEventID string, limit int) ([]*domain.Event, error) {
 	// If sinceEventID is provided, find its timestamp to use as a cursor
-	var sinceTimestamp time.Time
-	if sinceEventID != "" {
-		event, err := s.eventRepo.GetEventByID(ctx, sinceEventID)
-		if err != nil {
-			if errors.Is(err, errors.New("event not found")) { // Specific error from repository
-				return nil, errors.New("invalid since_event_id")
-			}
-			return nil, err
-		}
-		sinceTimestamp = event.ServerTimestamp
-	} else {
-		// If no sinceEventID, get events from the very beginning (or a reasonable default past)
-		// For simplicity, if not provided, just get the latest `limit` events.
-		// A more robust client would always provide the last known event ID.
-		sinceTimestamp = time.Time{} // Zero time means no lower bound on timestamp for initial fetch
-	}
+	// var sinceTimestamp time.Time
+	// if sinceEventID != "" {
+	// 	event, err := s.eventRepo.GetEventByID(ctx, sinceEventID)
+	// 	if err != nil {
+	// 		if errors.Is(err, errors.New("event not found")) { // Specific error from repository
+	// 			return nil, errors.New("invalid since_event_id")
+	// 		}
+	// 		return nil, err
+	// 	}
+	// 	sinceTimestamp = event.ServerTimestamp
+	// } else {
+	// 	// If no sinceEventID, get events from the very beginning (or a reasonable default past)
+	// 	// For simplicity, if not provided, just get the latest `limit` events.
+	// 	// A more robust client would always provide the last known event ID.
+	// 	sinceTimestamp = time.Time{} // Zero time means no lower bound on timestamp for initial fetch
+	// }
 
 	if limit == 0 {
 		limit = 50 // Default limit for event feed

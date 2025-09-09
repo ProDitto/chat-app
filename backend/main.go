@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -55,13 +54,13 @@ func main() {
 
 	// Services
 	tokenService := services.NewTokenService(userRepo, tokenRepo, cfg.JWTSecret, time.Hour*8, time.Hour*24*7, time.Minute*30) // OTP expiry 30 mins
-	eventService := services.NewEventService(eventRepo, userRepo) // New event service
+	eventService := services.NewEventService(eventRepo, userRepo)                                                             // New event service
 	userService := services.NewUserService(userRepo, tokenService, emailSender)
 	convoService := services.NewConversationService(convoRepo, userRepo, groupRepo)
 	messageService := services.NewMessageService(messageRepo, convoRepo, userRepo)
 	friendshipService := services.NewFriendshipService(friendshipRepo, userRepo, convoService, eventService) // Pass eventService
-	groupService := services.NewGroupService(groupRepo, userRepo, convoService, eventService) // Pass eventService
-	gameService := services.NewGameService(gameRepo, userRepo, convoService, eventService) // Pass eventService
+	groupService := services.NewGroupService(groupRepo, userRepo, convoService, eventService)                // Pass eventService
+	gameService := services.NewGameService(gameRepo, userRepo, convoService, eventService)                   // Pass eventService
 
 	// WebSocket Hub
 	hub := ws_delivery.NewHub(messageService, convoService, gameService, eventService) // Pass eventService to Hub
@@ -105,7 +104,7 @@ func main() {
 	r.Route("/api", func(r chi.Router) {
 		// Public routes
 		r.Post("/register", userHandler.Register)
-		r.Get("/verify-email", userHandler.VerifyEmail) // GET for direct link click
+		r.Get("/verify-email", userHandler.VerifyEmail)  // GET for direct link click
 		r.Post("/verify-email", userHandler.VerifyEmail) // POST for manual token entry
 		r.Post("/login", userHandler.Login)
 		r.Post("/refresh", userHandler.RefreshToken)

@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"strconv"
@@ -21,9 +20,10 @@ func CheckPasswordHash(password, hash string) error {
 
 // GenerateOTP generates a random N-digit OTP.
 func GenerateOTP(length int) string {
-	rand.Seed(time.Now().UnixNano())
-	min := int(math.Pow10(float64(length - 1)))
-	max := int(math.Pow10(float64(length))) - 1
+	// rand.Seed(time.Now().UnixNano())
+	rand.New(rand.NewSource(time.Now().UnixNano()))
+	min := int(math.Pow10(length - 1))
+	max := int(math.Pow10(length)) - 1
 	otp := rand.Intn(max-min+1) + min
 	return strconv.Itoa(otp)
 }

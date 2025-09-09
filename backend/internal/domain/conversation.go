@@ -7,20 +7,20 @@ import (
 
 type ConversationType string
 
-// const (
-// 	TypeOneToOne     ConversationType = "one-on-one"
-// 	TypeGroup        ConversationType = "group"
-// )
+const (
+	TypeOneToOne ConversationType = "one-on-one"
+	TypeGroup    ConversationType = "group"
+)
 
 type Conversation struct {
-	ID                string           `json:"id"`
-	Type              ConversationType `json:"type"`
-	CreatedAt         time.Time        `json:"created_at"`
-	Name              string           `json:"name,omitempty"`              // For groups or derived for 1-on-1
-	LastMessage       *Message         `json:"last_message,omitempty"`
-	Participants      []*User          `json:"participants,omitempty"`
-	UnreadCount       int              `json:"unread_count"`
-	Group             *Group           `json:"group,omitempty"` // Only for Group conversations
+	ID           string           `json:"id"`
+	Type         ConversationType `json:"type"`
+	CreatedAt    time.Time        `json:"created_at"`
+	Name         string           `json:"name,omitempty"` // For groups or derived for 1-on-1
+	LastMessage  *Message         `json:"last_message,omitempty"`
+	Participants []*User          `json:"participants,omitempty"`
+	UnreadCount  int              `json:"unread_count"`
+	Group        *Group           `json:"group,omitempty"` // Only for Group conversations
 }
 
 type ConversationRepository interface {
@@ -34,4 +34,5 @@ type ConversationRepository interface {
 	UpdateLastRead(ctx context.Context, conversationID, userID string) error
 	Delete(ctx context.Context, conversationID string) error
 	GetLastReadTimestamp(ctx context.Context, conversationID, userID string) (time.Time, error)
+	IsUserInConversation(ctx context.Context, conversationID, userID string) (bool, error)
 }

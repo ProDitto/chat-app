@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"math/rand"
 	"real-time-chat/internal/domain"
 	"real-time-chat/internal/usecase"
@@ -15,21 +14,21 @@ import (
 )
 
 var (
-	ErrGameNotFound          = errors.New("game not found")
-	ErrNotYourTurn           = errors.New("it's not your turn")
-	ErrInvalidMove           = errors.New("invalid move")
-	ErrGameAlreadyFinished   = errors.New("game is already finished")
-	ErrGameAlreadyStarted    = errors.New("game already started")
-	ErrAlreadyInvited        = errors.New("player already invited to a game")
-	ErrNotGameParticipant    = errors.New("not a participant of this game")
-	ErrGameAlreadyResponded  = errors.New("game invitation already responded to")
+	ErrGameNotFound         = errors.New("game not found")
+	ErrNotYourTurn          = errors.New("it's not your turn")
+	ErrInvalidMove          = errors.New("invalid move")
+	ErrGameAlreadyFinished  = errors.New("game is already finished")
+	ErrGameAlreadyStarted   = errors.New("game already started")
+	ErrAlreadyInvited       = errors.New("player already invited to a game")
+	ErrNotGameParticipant   = errors.New("not a participant of this game")
+	ErrGameAlreadyResponded = errors.New("game invitation already responded to")
 )
 
 type gameService struct {
 	gameRepo     domain.GameRepository
 	userRepo     domain.UserRepository
 	convoService usecase.ConversationUseCase // To get participants for broadcasting
-	eventService usecase.EventUseCase      // For publishing game events
+	eventService usecase.EventUseCase        // For publishing game events
 }
 
 func NewGameService(gameRepo domain.GameRepository, userRepo domain.UserRepository, convoService usecase.ConversationUseCase, eventService usecase.EventUseCase) usecase.GameUseCase {
@@ -57,7 +56,7 @@ func (s *gameService) InviteToTicTacToe(ctx context.Context, player1ID, player2U
 	}
 
 	initialState := &domain.TicTacToeState{
-		Board:      [3][3]string{},
+		Board:       [3][3]string{},
 		CurrentTurn: firstPlayerID,
 	}
 	stateBytes, err := json.Marshal(initialState)
@@ -66,21 +65,21 @@ func (s *gameService) InviteToTicTacToe(ctx context.Context, player1ID, player2U
 	}
 
 	game := &domain.Game{
-		ID:           uuid.NewString(),
-		Player1ID:    player1ID,
-		Player2ID:    player2.ID,
-		InitiatorID:  player1ID,
-		GameType:     "tic-tac-toe",
-		Status:       domain.GamePending, // Waiting for player2 to accept
-		State:        stateBytes,
-		CreatedAt:    time.Now().UTC(),
-		UpdatedAt:    time.Now().UTC(),
+		ID:          uuid.NewString(),
+		Player1ID:   player1ID,
+		Player2ID:   player2.ID,
+		InitiatorID: player1ID,
+		GameType:    "tic-tac-toe",
+		Status:      domain.GamePending, // Waiting for player2 to accept
+		State:       stateBytes,
+		CreatedAt:   time.Now().UTC(),
+		UpdatedAt:   time.Now().UTC(),
 	}
 
 	if err := s.gameRepo.Create(ctx, game); err != nil {
 		return nil, err
 	}
-	
+
 	// Create an event for the invited player
 	s.eventService.CreateEvent(ctx, player2.ID, domain.EventGameInvite, game)
 

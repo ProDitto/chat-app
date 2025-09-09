@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"real-time-chat/internal/domain"
 	"real-time-chat/internal/usecase"

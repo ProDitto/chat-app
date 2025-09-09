@@ -9,14 +9,14 @@ import (
 type EventType string
 
 const (
-	EventNewMessage     EventType = "new_message"
-	EventFriendRequest  EventType = "friend_request"
-	EventFriendAccepted EventType = "friend_accepted"
-	EventGameInvite     EventType = "game_invite"
-	EventGameUpdate     EventType = "game_update"
-	EventGroupCreated   EventType = "group_created"
-	EventGroupJoined    EventType = "group_joined"
-	EventGroupLeft      EventType = "group_left"
+	EventNewMessage          EventType = "new_message"
+	EventFriendRequest       EventType = "friend_request"
+	EventFriendAccepted      EventType = "friend_accepted"
+	EventGameInvite          EventType = "game_invite"
+	EventGameUpdate          EventType = "game_update"
+	EventGroupCreated        EventType = "group_created"
+	EventGroupJoined         EventType = "group_joined"
+	EventGroupLeft           EventType = "group_left"
 	EventConversationDeleted EventType = "conversation_deleted"
 )
 

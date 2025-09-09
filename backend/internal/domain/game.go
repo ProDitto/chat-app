@@ -10,33 +10,33 @@ import (
 type GameStatus string
 
 const (
-	GamePending GameStatus = "pending"
-	GameActive  GameStatus = "active"
+	GamePending  GameStatus = "pending"
+	GameActive   GameStatus = "active"
 	GameFinished GameStatus = "finished"
 	GameDeclined GameStatus = "declined"
 )
 
 // TicTacToeState represents the state of a Tic-Tac-Toe game
 type TicTacToeState struct {
-	Board      [3][3]string `json:"board"` // "X", "O", or ""
-	CurrentTurn string      `json:"current_turn"` // Player ID
-	Winner      string      `json:"winner,omitempty"` // Player ID or "draw"
-	LastMove   *struct {
+	Board       [3][3]string `json:"board"`            // "X", "O", or ""
+	CurrentTurn string       `json:"current_turn"`     // Player ID
+	Winner      string       `json:"winner,omitempty"` // Player ID or "draw"
+	LastMove    *struct {
 		Row int `json:"row"`
 		Col int `json:"col"`
 	} `json:"last_move,omitempty"`
 }
 
 type Game struct {
-	ID           string          `json:"id"`
-	Player1ID    string          `json:"player1_id"`
-	Player2ID    string          `json:"player2_id"`
-	InitiatorID  string          `json:"initiator_id"` // Who sent the invite
-	GameType     string          `json:"game_type"`    // "tic-tac-toe"
-	Status       GameStatus      `json:"status"`
-	State        json.RawMessage `json:"state"` // JSON representation of TicTacToeState
-	CreatedAt    time.Time       `json:"created_at"`
-	UpdatedAt    time.Time       `json:"updated_at"`
+	ID          string          `json:"id"`
+	Player1ID   string          `json:"player1_id"`
+	Player2ID   string          `json:"player2_id"`
+	InitiatorID string          `json:"initiator_id"` // Who sent the invite
+	GameType    string          `json:"game_type"`    // "tic-tac-toe"
+	Status      GameStatus      `json:"status"`
+	State       json.RawMessage `json:"state"` // JSON representation of TicTacToeState
+	CreatedAt   time.Time       `json:"created_at"`
+	UpdatedAt   time.Time       `json:"updated_at"`
 }
 
 func (g *Game) GetTicTacToeState() (*TicTacToeState, error) {

@@ -3,9 +3,9 @@ package http_delivery
 import (
 	"encoding/json"
 	"net/http"
+	"real-time-chat/internal/delivery/ws_delivery" // For broadcasting game updates
 	"real-time-chat/internal/domain"
 	"real-time-chat/internal/usecase"
-	"real-time-chat/internal/delivery/ws_delivery" // For broadcasting game updates
 
 	"github.com/go-chi/chi/v5"
 )

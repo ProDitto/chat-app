@@ -12,10 +12,10 @@ import (
 )
 
 const (
-	writeWait      = 10 * time.Second
-	pongWait       = 60 * time.Second
+	writeWait = 10 * time.Second
+	pongWait  = 60 * time.Second
 	// Ping period is 30 seconds as per requirement (must be less than pongWait)
-	pingPeriod     = 30 * time.Second 
+	pingPeriod     = 30 * time.Second
 	maxMessageSize = 512
 )
 
@@ -56,14 +56,14 @@ func (c *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		
+
 		var msg WebSocketMessage
 		if err := json.Unmarshal(message, &msg); err == nil {
 			payload := &BroadcastPayload{
-				Message: message,
-				SenderID: c.UserID,
-				EventType: domain.EventType(msg.Type), // Convert string type to domain.EventType
-				EventPayload: msg.Payload, // The raw JSON payload for event persistence
+				Message:      message,
+				SenderID:     c.UserID,
+				EventType:    domain.EventType(msg.Type), // Convert string type to domain.EventType
+				EventPayload: msg.Payload,                // The raw JSON payload for event persistence
 			}
 			// Extract ConversationID if it's a message type
 			if msg.Type == "send_message" {

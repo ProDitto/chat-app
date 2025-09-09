@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"real-time-chat/internal/domain"
 	"real-time-chat/internal/usecase"
@@ -59,11 +58,11 @@ func (s *friendshipService) SendRequest(ctx context.Context, requesterID, recipi
 	eventPayload := map[string]interface{}{
 		"id": request.ID,
 		"sender": map[string]string{
-			"id": request.UserID1,
-			"username": requester.Username,
+			"id":                request.UserID1,
+			"username":          requester.Username,
 			"profilePictureUrl": requester.ProfilePictureURL,
 		},
-		"status": request.Status,
+		"status":    request.Status,
 		"createdAt": request.CreatedAt,
 	}
 	s.eventService.CreateEvent(ctx, recipient.ID, domain.EventFriendRequest, eventPayload)
@@ -100,16 +99,18 @@ func (s *friendshipService) RespondToRequest(ctx context.Context, userID, reques
 		}
 		// Create an event for both users when friend request is accepted
 		recipientUser, err := s.userRepo.FindByID(ctx, updatedRequest.UserID2)
-		if err != nil { /* handle error */ }
+		if err != nil { /* handle error */
+		}
 		requesterUser, err := s.userRepo.FindByID(ctx, updatedRequest.UserID1)
-		if err != nil { /* handle error */ }
+		if err != nil { /* handle error */
+		}
 
 		// Payload will be the accepted friendship details
 		eventPayload := map[string]interface{}{
-			"id": updatedRequest.ID,
-			"user1": requesterUser,
-			"user2": recipientUser,
-			"status": updatedRequest.Status,
+			"id":        updatedRequest.ID,
+			"user1":     requesterUser,
+			"user2":     recipientUser,
+			"status":    updatedRequest.Status,
 			"createdAt": updatedRequest.CreatedAt,
 		}
 		s.eventService.CreateEvent(ctx, updatedRequest.UserID1, domain.EventFriendAccepted, eventPayload)

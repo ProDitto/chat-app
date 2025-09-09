@@ -9,10 +9,9 @@ import (
 	"path/filepath"
 	"real-time-chat/internal/domain"
 	"real-time-chat/internal/usecase"
-	"real-time-chat/internal/utils"
 	"strings"
-	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
 
