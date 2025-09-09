@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Roboto+Slab:wght@700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-background-primary: 255 255 255;
+  --color-background-secondary: 243 244 246;
+  --color-text-primary: 17 24 39;
+  --color-text-secondary: 75 85 99;
+  --color-border: 229 231 235;
+  --color-primary-accent: 79 70 229;
+  --color-secondary-accent: 30 64 175;
+  --color-status-success: 22 163 74;
+  --color-status-warning: 234 179 8;
+  --color-status-error: 220 38 38;
+  --color-status-info: 59 130 246;
+}
+
+.dark {
+  --color-background-primary: 17 24 39;
+  --color-background-secondary: 31 41 55;
+  --color-text-primary: 243 244 246;
+  --color-text-secondary: 156 163 175;
+  --color-border: 55 65 81;
+  --color-primary-accent: 99 102 241;
+  --color-secondary-accent: 59 130 246;
+}
+
+body {
+  @apply bg-background-primary text-text-primary font-sans;
+}
